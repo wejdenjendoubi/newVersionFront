@@ -39,7 +39,16 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/user-management', // Doit correspondre exactement au "path" défini dans les routes
         icon: 'feather icon-users'
-}
+      },
+      {
+        id: 'audit-logs',
+        title: 'Audit Logs',
+        type: 'item',
+        url: '/audit',
+        icon: 'feather icon-clipboard',
+        classes: 'nav-item'
+      }
+
     ]
   },
 

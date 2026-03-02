@@ -1,11 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 
-// On définit exactement ce que le token contient pour éviter les erreurs de type
 interface JwtPayload {
   sub: string;
   authorities?: string[];
@@ -21,16 +20,15 @@ export interface UserDTO {
 
 interface LoginResponse {
   token: string;
-  // Ajoute d'autres propriétés si ton backend en renvoie (ex: email, id)
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
-  private readonly router = inject(Router);
+  private readonly http               = inject(HttpClient);
+  private readonly router             = inject(Router);
   private readonly currentUserSubject = new BehaviorSubject<UserDTO | null>(null);
-  public readonly currentUser$ = this.currentUserSubject.asObservable();
-  private readonly API_URL = 'http://localhost:8080/api/auth';
+  public  readonly currentUser$       = this.currentUserSubject.asObservable();
+  private readonly API_URL            = 'http://localhost:8080/api/auth';
 
   constructor() {
     const token = localStorage.getItem('token');
@@ -47,42 +45,38 @@ export class AuthService {
   login(credentials: Record<string, string>): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.API_URL}/signin`, credentials).pipe(
       tap((response: LoginResponse) => {
-        if (response && response.token) {
+        if (response?.token) {
           localStorage.setItem('token', response.token);
           const user = this.decodeToken(response.token);
           this.currentUserSubject.next(user);
         }
       }),
-      catchError((error: HttpErrorResponse) => {
-        // On renvoie l'erreur complète pour que le composant puisse l'afficher
-        return throwError(() => error);
-      })
+      catchError((error: HttpErrorResponse) => throwError(() => error))
     );
   }
 
   private decodeToken(token: string): UserDTO {
     try {
-      const decoded = jwtDecode<JwtPayload>(token);
-
-      // On récupère les rôles peu importe le nom dans le JWT (authorities ou roles)
+      const decoded      = jwtDecode<JwtPayload>(token);
       const rolesFromToken = decoded.authorities || decoded.roles || [];
+      const rolesArray: string[] = Array.isArray(rolesFromToken)
+        ? rolesFromToken
+        : [rolesFromToken];
 
-      // On s'assure que c'est bien un tableau pour le .map()
-      const rolesArray: string[] = Array.isArray(rolesFromToken) ? rolesFromToken : [rolesFromToken];
-
+      // ✅ const au lieu de let — plus d'erreur lint
       const formattedRoles = rolesArray.map((role: string) => {
-        let formatted = role.trim().toUpperCase();
-        formatted = formatted.replace(/\s+/g, '_');
-        return formatted.startsWith('ROLE_') ? formatted : `ROLE_${formatted}`;
+        const normalized = role.trim().toUpperCase().replace(/\s+/g, '_');
+        return normalized.startsWith('ROLE_') ? normalized : `ROLE_${normalized}`;
       });
 
       return {
-        userName: decoded.sub || '',
+        userName:    decoded.sub || '',
         authorities: formattedRoles,
-        token: token
+        token
       };
+
     } catch (error) {
-      console.error("Erreur de décodage du token", error);
+      console.error('Erreur de décodage du token', error);
       return { userName: '', authorities: [], token: '' };
     }
   }
@@ -93,7 +87,7 @@ export class AuthService {
 
   hasRole(role: string): boolean {
     const user = this.currentUserValue;
-    if (!user || !user.authorities) return false;
+    if (!user?.authorities) return false;
     const target = role.toUpperCase().trim();
     const targetWithPrefix = target.startsWith('ROLE_') ? target : `ROLE_${target}`;
     return user.authorities.includes(targetWithPrefix);
@@ -105,6 +99,21 @@ export class AuthService {
   }
 
   logout(): void {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+
+      this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
+        catchError(() => throwError(() => null))
+      ).subscribe({
+        next:  () => console.log('✅ Logout loggué en base'),
+        error: () => console.warn('⚠️ Backend logout inaccessible')
+      });
+    }
+
     this.clearStorage();
     this.router.navigate(['/login']);
   }

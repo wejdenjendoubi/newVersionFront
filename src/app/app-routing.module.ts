@@ -1,4 +1,5 @@
-import { NgModule } from '@angular/core';
+
+import { NgModule} from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AdminComponent } from './theme/layout/admin/admin.component';
@@ -10,6 +11,7 @@ import { UserManagement } from './pages/admin/user-management/user-management';
 import { AuthGuard } from './guards/auth-guard';
 import { RolePermissions } from './pages/role-permissions/role-permissions';
 import { MenuManagement } from './pages/menu-management/menu-management';
+import { AuditListComponent } from './features/audit/audit-list/audit-list';
 
 
 const routes: Routes = [
@@ -42,6 +44,12 @@ const routes: Routes = [
     {path: 'menu-management',
     component: MenuManagement
     },
+    {
+    path: 'audit',
+    component: AuditListComponent,
+    canActivate: [AuthGuard]
+    },
+
 
     ]
   },

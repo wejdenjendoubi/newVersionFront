@@ -1,5 +1,5 @@
 // angular import
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 
 // bootstrap import
@@ -9,6 +9,7 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
+import { AuthService } from 'src/app/services/auth';
 
 @Component({
   selector: 'app-nav-right',
@@ -44,5 +45,17 @@ export class NavRightComponent {
   onChatToggle(friendID: any) {
     this.friendId = friendID;
     this.chatMessage = !this.chatMessage;
+  }
+
+  private authService = inject(AuthService);
+
+  onLogout() {
+
+    const confirmLogout = confirm('Voulez-vous vraiment vous déconnecter ?');
+
+    if (confirmLogout) {
+      // Exécute clearStorage() et navigation vers /login
+      this.authService.logout();
+    }
   }
 }
