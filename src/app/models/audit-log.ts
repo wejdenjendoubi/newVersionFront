@@ -31,14 +31,29 @@ export type EventType =
 export type Severity = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
 
 export interface AuditFilter {
-  eventType?: EventType | '';
-  severity?: Severity | '';
+  eventType?: EventType | null | '';
+ severity?: Severity | null | '';
   userId?: number;
   from?: string;
   to?: string;
   page?: number;
   size?: number;
   sort?: string;
+}
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+export interface AuditLog {
+  id: number;
+  eventType: EventType;
+  severity: Severity;
+  username: string;
+  action: string;
+  // ... rest of your fields
+  createdAt: string;
 }
 
 export interface PageResponse<T> {

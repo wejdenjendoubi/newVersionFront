@@ -1,46 +1,46 @@
-
 import { CommonModule, DatePipe, JsonPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuditFilter, AuditLog, EventType, PageResponse, Severity } from 'src/app/models/audit-log';
+// ✅ Import de ApiResponse ajouté
+import { AuditFilter, AuditLog, EventType, PageResponse, Severity, ApiResponse } from 'src/app/models/audit-log';
 import { AuditService } from 'src/app/services/audit';
-
 
 @Component({
   selector: 'app-audit-list',
   templateUrl: './audit-list.html',
-  styleUrls:  ['./audit-list.scss'],
+  styleUrls: ['./audit-list.scss'],
   standalone: true,
-  // ✅ Tous les imports nécessaires déclarés ici
   imports: [
-    CommonModule,   // ngClass, ngIf legacy (au cas où)
-    FormsModule,    // ngModel
-    DatePipe,       // | date
-    JsonPipe,       // | json
-    NgClass         // [ngClass]
+    CommonModule,
+    FormsModule,
+    DatePipe,
+    JsonPipe,
+    NgClass
   ]
 })
 export class AuditListComponent implements OnInit {
 
-  // ✅ inject() à la place du constructor
   private auditService = inject(AuditService);
 
-  logs          = signal<AuditLog[]>([]);
+  // Signals pour la réactivité Angular
+  logs = signal<AuditLog[]>([]);
   totalElements = signal(0);
-  totalPages    = signal(0);
-  loading       = signal(false);
-  selectedLog   = signal<AuditLog | null>(null);
+  totalPages = signal(0);
+  loading = signal(false);
+  selectedLog = signal<AuditLog | null>(null);
 
+  // ✅ Filtres initialisés avec 'as any' pour accepter la chaîne vide '' 
+  // malgré le type strict de l'énumération.
   filters: AuditFilter = {
-    eventType: '',
-    severity: '',
+    eventType: '' as any,
+    severity: '' as any,
     page: 0,
     size: 20
   };
 
   eventTypes: EventType[] = [
     'LOGIN', 'LOGOUT', 'LOGIN_FAILED',
-    'CREATE', 'UPDATE', 'DELETE', 'ERROR'
+    'CREATE', 'UPDATE', 'DELETE', 'ERROR', 'EXPORT', 'IMPORT'
   ];
 
   severities: Severity[] = ['INFO', 'WARNING', 'ERROR', 'CRITICAL'];
@@ -55,14 +55,24 @@ export class AuditListComponent implements OnInit {
 
   loadLogs(): void {
     this.loading.set(true);
+    
+    // ✅ CORRECTION : Le type attendu dans le subscribe est ApiResponse
     this.auditService.getLogs(this.filters).subscribe({
-      next: (page: PageResponse<AuditLog>) => {
-        this.logs.set(page.content);
-        this.totalElements.set(page.totalElements);
-        this.totalPages.set(page.totalPages);
+      next: (response: ApiResponse<PageResponse<AuditLog>>) => {
+        // ✅ On récupère les données dans .data (structure de ton backend)
+        const page = response.data;
+        
+        if (page) {
+          this.logs.set(page.content);
+          this.totalElements.set(page.totalElements);
+          this.totalPages.set(page.totalPages);
+        }
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: (err) => {
+        console.error('Erreur lors du chargement des logs', err);
+        this.loading.set(false);
+      }
     });
   }
 
@@ -72,7 +82,12 @@ export class AuditListComponent implements OnInit {
   }
 
   resetFilters(): void {
-    this.filters = { eventType: '', severity: '', page: 0, size: 20 };
+    this.filters = { 
+      eventType: '' as any, 
+      severity: '' as any, 
+      page: 0, 
+      size: 20 
+    };
     this.loadLogs();
   }
 
@@ -81,8 +96,15 @@ export class AuditListComponent implements OnInit {
     this.loadLogs();
   }
 
-  openDetail(log: AuditLog): void { this.selectedLog.set(log);   }
-  closeDetail(): void             { this.selectedLog.set(null);  }
+  openDetail(log: AuditLog): void { 
+    this.selectedLog.set(log); 
+  }
+
+  closeDetail(): void { 
+    this.selectedLog.set(null); 
+  }
+
+  // --- Helpers de style ---
 
   getSeverityClass(severity: Severity): string {
     const map: Record<Severity, string> = {
@@ -102,7 +124,9 @@ export class AuditListComponent implements OnInit {
       CREATE:       'event-create',
       UPDATE:       'event-update',
       DELETE:       'event-delete',
-      ERROR:        'event-error'
+      ERROR:        'event-error',
+      EXPORT:       'event-export',
+      IMPORT:       'event-import'
     };
     return map[eventType] ?? '';
   }
