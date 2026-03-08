@@ -55,9 +55,7 @@ export class UserManagement implements OnInit {
     });
 
     this.adminService.getSites().subscribe({
-      next: (res) => {
-        this.sites.set(res);
-      },
+      next: (res) => this.sites.set(res),
       error: (err) => console.error('Erreur sites:', err)
     });
   }
@@ -85,7 +83,7 @@ export class UserManagement implements OnInit {
     };
   }
 
-  // --- Validations ---
+  // --- Validations Locales ---
   isEmailValid(email: string): boolean {
     if (!email) return false;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -94,7 +92,6 @@ export class UserManagement implements OnInit {
 
   isNameValid(name: string): boolean {
     if (!name) return false;
-    // Autorise uniquement lettres (y compris accents), espaces et tirets
     const nameRegex = /^[a-zA-ZàâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ\s\-]+$/;
     return nameRegex.test(name);
   }
@@ -117,13 +114,13 @@ export class UserManagement implements OnInit {
     this.isLoading.set(false);
   }
 
-  // --- Sauvegarde ---
+  // --- Sauvegarde avec gestion d'erreur d'existence email ---
   saveUser() {
     const user = this.newUser();
 
-    // Validation finale avant envoi
+    // 1. Validations de format (Front-end)
     if (!this.isEmailValid(user.email)) {
-      alert("Veuillez saisir une adresse e-mail valide.");
+      alert("Veuillez saisir une adresse e-mail au format valide.");
       return;
     }
 
@@ -157,10 +154,17 @@ export class UserManagement implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
-        if (err.status === 403) {
-          alert("Erreur 403 : Accès refusé.");
+        
+        // --- LOGIQUE DE DÉTECTION D'ERREUR BACKEND ---
+        // On vérifie si le backend a envoyé un message d'erreur spécifique (Email introuvable)
+        if (err.error && err.error.message) {
+          alert(err.error.message); // Affiche "L'adresse email est introuvable ou ne peut pas recevoir de messages."
+        } else if (err.status === 403) {
+          alert("Erreur 403 : Vous n'avez pas les permissions nécessaires.");
+        } else if (err.status === 400) {
+          alert("Données invalides. Veuillez vérifier les informations saisies.");
         } else {
-          alert(`Erreur ${err.status} lors de l'enregistrement.`);
+          alert(`Une erreur est survenue lors de l'enregistrement (Code: ${err.status})`);
         }
       }
     });

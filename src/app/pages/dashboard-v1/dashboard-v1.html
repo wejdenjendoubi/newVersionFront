@@ -1,79 +1,39 @@
-<div class="row">
-  @for (card of cards; track card) {
-    <div class="col-md-6 col-xl-3">
-      <app-card
-        [hidHeader]="true"
-        cardClass="{{ card.background }} order-card"
-        (click)="navigateTo(card.title)"
-        style="cursor: pointer;">
-
-        <h6 class="text-white">{{ card.title }}</h6>
-        <h2 class="text-end text-white">
-          <i class="feather {{ card.icon }} float-start"></i>
-          <span>{{ card.number }}</span>
-        </h2>
-        <p class="m-b-0">{{ card.text }}<span class="float-end">{{ card.no }}</span></p>
-      </app-card>
-    </div>
-  }
-</div>
-
-<!-- <div class="col-xl-6 col-md-12">
-    <app-card cardTitle="Unique Visitor">
-      <apx-chart
-        [chart]="chartOptions.chart!"
-        [dataLabels]="chartOptions.dataLabels!"
-        [stroke]="chartOptions.stroke!"
-        [series]="chartOptions.series!"
-        [xaxis]="chartOptions.xaxis!"
-        [colors]="chartOptions.colors!"
-        [fill]="chartOptions.fill!"
-        [yaxis]="chartOptions.yaxis!"
-        [grid]="chartOptions.grid!"
-      ></apx-chart>
-    </app-card>
-  </div>-->
-
-  <!--<div class="col-xl-6 col-md-12">
-    <div class="row">
-      <div class="col-md-6">
-        <app-card [hidHeader]="true">
-          <div class="row">
-            <div class="col-auto"><span>Customers</span></div>
-            <div class="col text-end">
-              <h2 class="mb-0">826</h2>
-              <span class="text-c-green">8.2% <i class="feather icon-trending-up ms-1"></i></span>
-            </div>
-          </div>
-          <apx-chart
-            [series]="chartOptions_1.series!"
-            [chart]="chartOptions_1.chart!"
-            [stroke]="chartOptions_1.stroke!"
-            [dataLabels]="chartOptions_1.dataLabels!"
-            [labels]="chartOptions_1.labels!"
-            [legend]="chartOptions_1.legend!"
-            [colors]="chartOptions_1.colors!"
-          ></apx-chart>
-        </app-card>
-      </div>
-      <div class="col-md-6">
-        <app-card [hidHeader]="true" cardClass="bg-primary text-white">
-          <div class="row">
-            <div class="col-auto"><span>Customers</span></div>
-            <div class="col text-end">
-              <h2 class="mb-0 text-white">826</h2>
-              <span class="text-white">8.2% <i class="feather icon-trending-up ms-1"></i></span>
-            </div>
-          </div>
-          <apx-chart
-            [series]="chartOptions_2.series!"
-            [chart]="chartOptions_2.chart!"
-            [labels]="chartOptions_2.labels!"
-            [colors]="chartOptions_2.colors!"
-            [legend]="chartOptions_2.legend!"
-          ></apx-chart>
-        </app-card>
-      </div>
+@if (isLoading()) {
+  <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
     </div>
   </div>
-</div>-->
+} @else {
+
+  @if (visibleCards().length === 0) {
+    <div class="text-center py-5">
+      <i class="feather icon-layout" style="font-size:3rem; opacity:0.3"></i>
+      <p class="mt-3 text-muted">Aucune carte configurée pour votre rôle.</p>
+    </div>
+  }
+
+  <div class="row g-3">
+    @for (card of visibleCards(); track card.id) {
+      <div class="col-6 col-md-4 col-xl-3">
+        <div class="stat-card"
+             [class.stat-card--clickable]="card.navigateTo"
+             (click)="navigateTo(card)">
+
+          <div class="stat-card__icon" [style.background]="card.iconBg">
+            <i [class]="'feather ' + card.icon" [style.color]="card.iconColor"></i>
+          </div>
+
+          <div class="stat-card__body">
+            @if (card.resolvedValue && card.resolvedValue !== '—') {
+              <div class="stat-card__value">{{ card.resolvedValue }}</div>
+            }
+            <div class="stat-card__label">{{ card.subLabel || card.title }}</div>
+          </div>
+
+        </div>
+      </div>
+    }
+  </div>
+
+}

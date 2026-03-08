@@ -21,7 +21,7 @@ export interface NavigationItem {
 export const NavigationItems: NavigationItem[] = [
   {
     id: 'navigation',
-    title: 'Mon Projet',
+    title: '',
     type: 'group',
     icon: 'icon-navigation',
     children: [
@@ -30,7 +30,7 @@ export const NavigationItems: NavigationItem[] = [
         title: 'Mon Dashboard CWMS',
         type: 'item',
         url: '/dashboard-v1',
-        icon: 'feather icon-home',
+        icon: 'feather icon-layout',
         classes: 'nav-item'
       },
       {

@@ -59,7 +59,7 @@ export class NavContentComponent implements OnInit {
 
         const dynamicGroup: NavigationItem = {
           id: 'dynamic-group',
-          title: 'Mon Projet',
+          title: '',
           type: 'group',
           icon: 'icon-navigation',
           // Correction de l'erreur "children" : on force le mapping vers NavigationItem

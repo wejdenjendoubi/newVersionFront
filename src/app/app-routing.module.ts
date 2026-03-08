@@ -49,12 +49,14 @@ const routes: Routes = [
     component: AuditListComponent,
     canActivate: [AuthGuard]
     },
+    
 
 
     ]
   },
   { path: '**', redirectTo: 'login' }
 ];
+
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
