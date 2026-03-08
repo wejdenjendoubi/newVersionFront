@@ -11,36 +11,33 @@ import { UserDTO, Role, Site } from '../../../models/user.model';
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss',
 })
-
 export class UserManagement implements OnInit {
   private adminService = inject(AdminService);
 
-  // Signaux de données
+  // --- Signaux de données ---
   users = signal<UserDTO[]>([]);
   roles = signal<Role[]>([]);
   sites = signal<Site[]>([]);
-  
 
-  
-  // État UI
+  // --- État UI ---
   isLoading = signal(false);
   isPageLoading = signal(true);
   showModal = signal(false);
   isEditMode = signal(false);
   searchTerm = signal('');
 
-  // Formulaire : initialisé avec une fonction helper
+  // --- Formulaire ---
   newUser = signal<UserDTO>(this.initUser());
 
-
-  // Recherche filtrée avec computed pour la performance
+  // --- Recherche filtrée ---
   filteredUsers = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.users().filter(u =>
       u.firstName?.toLowerCase().includes(term) ||
       u.lastName?.toLowerCase().includes(term) ||
       u.roleName?.toLowerCase().includes(term) ||
-      u.siteName?.toLowerCase().includes(term)
+      u.siteName?.toLowerCase().includes(term) ||
+      u.email?.toLowerCase().includes(term)
     );
   });
 
@@ -50,10 +47,8 @@ export class UserManagement implements OnInit {
 
   loadInitialData() {
     this.isPageLoading.set(true);
-    
-    // Chargement parallèle des données
     this.refreshUsers();
-    
+
     this.adminService.getRoles().subscribe({
       next: (res) => this.roles.set(res),
       error: (err) => console.error('Erreur rôles:', err)
@@ -61,7 +56,6 @@ export class UserManagement implements OnInit {
 
     this.adminService.getSites().subscribe({
       next: (res) => {
-        console.log('Sites chargés:', res);
         this.sites.set(res);
       },
       error: (err) => console.error('Erreur sites:', err)
@@ -79,22 +73,36 @@ export class UserManagement implements OnInit {
   }
 
   initUser(): UserDTO {
-    return { 
-      userName: '', 
-      email: '', 
-      firstName: '', 
-      lastName: '', 
-      roleName: '', 
-      siteName: '', 
-      isActive: 1, 
-      authorities: [] 
+    return {
+      userName: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      roleName: '',
+      siteName: '',
+      isActive: 1,
+      authorities: []
     };
   }
 
+  // --- Validations ---
+  isEmailValid(email: string): boolean {
+    if (!email) return false;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
+  isNameValid(name: string): boolean {
+    if (!name) return false;
+    // Autorise uniquement lettres (y compris accents), espaces et tirets
+    const nameRegex = /^[a-zA-ZàâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ\s\-]+$/;
+    return nameRegex.test(name);
+  }
+
+  // --- Actions Modal ---
   openModal(user?: UserDTO) {
     if (user) {
       this.isEditMode.set(true);
-      // On crée une copie pour ne pas modifier la ligne du tableau en direct
       this.newUser.set({ ...user });
     } else {
       this.isEditMode.set(false);
@@ -106,47 +114,61 @@ export class UserManagement implements OnInit {
   closeModal() {
     this.showModal.set(false);
     this.newUser.set(this.initUser());
+    this.isLoading.set(false);
   }
 
+  // --- Sauvegarde ---
   saveUser() {
-  const user = this.newUser();
-  
-  // DEBUG : Vérifiez quel champ contient l'ID (id ou Id ou userId)
-  console.log('Utilisateur complet avant envoi:', user);
-  
-  // Utilisons une sécurité pour l'ID
-  const idToUse = user.id ?? (user as any).userId ?? (user as any).Id;
+    const user = this.newUser();
 
-  if (this.isEditMode() && !idToUse) {
-    console.error("Erreur : Impossible de modifier un utilisateur sans ID !");
-    alert("Erreur interne : ID manquant.");
-    return;
-  }
-
-  this.isLoading.set(true);
-
-  // Correction : On utilise bien l'ID trouvé pour l'URL du PUT
-  const obs = this.isEditMode()
-    ? this.adminService.updateUser(idToUse, user) 
-    : this.adminService.createUser(user);
-
-  obs.subscribe({
-    next: (res) => {
-      console.log('Réponse du serveur:', res);
-      this.refreshUsers();
-      this.closeModal();
-      this.isLoading.set(false);
-    },
-    error: (err) => {
-      console.error('Erreur lors de la mise à jour:', err);
-      this.isLoading.set(false);
+    // Validation finale avant envoi
+    if (!this.isEmailValid(user.email)) {
+      alert("Veuillez saisir une adresse e-mail valide.");
+      return;
     }
-  });
-}
+
+    if (!this.isNameValid(user.firstName) || !this.isNameValid(user.lastName)) {
+      alert("Le nom et le prénom ne doivent contenir que des lettres.");
+      return;
+    }
+
+    if (!user.userName || !user.roleName) {
+      alert("Le nom d'utilisateur et le rôle sont obligatoires.");
+      return;
+    }
+
+    const idToUse = user.id ?? (user as any).userId ?? (user as any).Id;
+
+    if (this.isEditMode() && !idToUse) {
+      alert("Erreur : Impossible d'identifier l'utilisateur à modifier.");
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    const obs = this.isEditMode()
+      ? this.adminService.updateUser(idToUse, user)
+      : this.adminService.createUser(user);
+
+    obs.subscribe({
+      next: (res) => {
+        this.refreshUsers();
+        this.closeModal();
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        if (err.status === 403) {
+          alert("Erreur 403 : Accès refusé.");
+        } else {
+          alert(`Erreur ${err.status} lors de l'enregistrement.`);
+        }
+      }
+    });
+  }
 
   confirmDelete(user: UserDTO) {
-    const id = user.id ?? (user as any).Id;
-    if (id && confirm(`Supprimer l'utilisateur ${user.firstName} ?`)) {
+    const id = user.id ?? (user as any).userId ?? (user as any).Id;
+    if (id && confirm(`Supprimer l'utilisateur ${user.firstName} ${user.lastName} ?`)) {
       this.adminService.deleteUser(id).subscribe({
         next: () => this.refreshUsers(),
         error: (err) => console.error('Erreur suppression:', err)
@@ -155,6 +177,7 @@ export class UserManagement implements OnInit {
   }
 
   updateSearch(event: Event) {
-    this.searchTerm.set((event.target as HTMLInputElement).value);
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(value);
   }
 }

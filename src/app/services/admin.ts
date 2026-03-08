@@ -11,7 +11,7 @@ export class AdminService {
   private apiUrl = `http://localhost:8080/api`;
 
   // Chemins d'accès sécurisés correspondant au SecurityConfig
-  private adminUsersUrl = `${this.apiUrl}/admin/users`; 
+  private adminUsersUrl = `${this.apiUrl}/admin/users`;
   private adminRolesUrl = `${this.apiUrl}/admin/roles`;
   private adminSitesUrl = `${this.apiUrl}/admin/sites`;
 
@@ -21,12 +21,14 @@ export class AdminService {
     );
   }
 
-  createUser(user: UserDTO): Observable<UserDTO> {
+ createUser(user: UserDTO): Observable<UserDTO> {
     // Changé de /api/users à /api/admin/users pour passer la sécurité
     return this.http.post<ApiResponse<UserDTO>>(this.adminUsersUrl, user).pipe(
       map(res => res.data)
     );
   }
+
+
 
   updateUser(id: number, user: UserDTO): Observable<UserDTO> {
   return this.http.put<ApiResponse<UserDTO>>(`${this.adminUsersUrl}/${id}`, user).pipe(
@@ -58,7 +60,7 @@ export class AdminService {
     );
   }
 
-  
+
 getAllMenuItems(): Observable<ApiResponse<MenuItemDTO[]>> {
     return this.http.get<ApiResponse<MenuItemDTO[]>>(`${this.apiUrl}/menu-items`);
   }

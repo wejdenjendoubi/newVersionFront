@@ -22,6 +22,10 @@ export class SignInComponent {
   showPassword = signal(false);
   isLoading = signal(false);
 
+  // Nouveau : Gestion des tentatives
+  attemptsLeft = signal(3);
+  isBlocked = signal(false);
+
   loginModal = signal({
     username: '',
     password: ''
@@ -34,31 +38,40 @@ export class SignInComponent {
 
   onSubmit(event: Event) {
     event.preventDefault();
+
+    // Si déjà bloqué, on ne fait rien
+    if (this.isBlocked()) {
+      this.error.set('Compte temporairement bloqué suite à trop d\'échecs.');
+      return;
+    }
+
     this.submitted.set(true);
     this.error.set('');
 
     const data = this.loginModal();
 
-    // Validation basique avant envoi
     if (data.username.trim() !== '' && data.password.trim() !== '') {
       this.isLoading.set(true);
 
       this.authService.login(data).subscribe({
         next: () => {
           this.isLoading.set(false);
-
-          /**
-
-           * Plus besoin de vérifier les rôles, redirection directe vers le dashboard unique.
-           * Le AuthGuard s'occupera de protéger les routes spécifiques par la suite.
-           */
+          this.attemptsLeft.set(3); // Réinitialisation en cas de succès
           this.router.navigate(['/dashboard-v1']);
         },
         error: (backendError) => {
           this.isLoading.set(false);
 
+          // Décrémenter les tentatives sur erreur 401
           if (backendError.status === 401) {
-            this.error.set('Identifiants incorrects.');
+            this.attemptsLeft.update(v => v - 1);
+
+            if (this.attemptsLeft() <= 0) {
+              this.isBlocked.set(true);
+              this.error.set('Accès bloqué : 3 tentatives échouées.');
+            } else {
+              this.error.set(`Identifiants incorrects. Il vous reste ${this.attemptsLeft()} tentative(s).`);
+            }
           } else {
             this.error.set('Utilisateur non enregistré ou erreur serveur.');
           }

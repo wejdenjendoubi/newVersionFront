@@ -1,55 +1,62 @@
+/* --- Vos styles existants --- */
 .btn-page .btn {
   margin-right: 8px;
 }
 
 .tab-card {
-  .nav-tabs {
-    margin-bottom: 1rem;
-  }
-
+  .nav-tabs { margin-bottom: 1rem; }
   .nav-pills {
     margin-bottom: 1rem;
-
-    .nav-item {
-      text-align: center;
-    }
+    .nav-item { text-align: center; }
   }
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 .table {
-  td,
-  th {
-    font-family: $theme-font-family;
-  }
+  td, th { font-family: $theme-font-family; }
 }
 
+.flex {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+/* --- MODIFICATION NAVBAR (Barre du haut) --- */
 .pcoded-header {
+  background: #004a99 !important; /* Bleu foncé demandé */
+  color: #ffffff !important;
+
   .search-bar {
     display: block;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  a, i, .dropdown-toggle {
+    color: #ffffff !important;
   }
 }
 
-.h-list-body .chat-messages .chat-menu-reply > div p,
-.pcoded-header.header-blue a.h-back-user-list {
-  color: $theme-font-color;
-}
+/* --- MODIFICATION SIDEBAR (Menu latéral) --- */
+/* On cible .pcoded-navbar et on force le style même si menu-light est présent */
+.pcoded-navbar {
+  background: #004a99 !important;
 
-.header-chat .h-list-footer .input-group .form-control {
-  height: auto;
-}
+  // Couleur du texte et des icônes
+  .pcoded-mtext, .pcoded-micon {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
 
-.pcoded-navbar.menu-light {
+  // Gestion des éléments actifs et du survol
   .pcoded-inner-navbar > app-nav-group > app-nav-collapse > li.active > a,
   .pcoded-inner-navbar > app-nav-group > app-nav-collapse > li.pcoded-trigger > a,
   .pcoded-inner-navbar > app-nav-group > app-nav-collapse > li:hover > a,
   .pcoded-inner-navbar > app-nav-group > app-nav-item > li.active > a,
   .pcoded-inner-navbar > app-nav-group > app-nav-item > li.pcoded-trigger > a,
   .pcoded-inner-navbar > app-nav-group > app-nav-item > li:hover > a {
-    background: rgba(202, 202, 202, 0.3);
+    background: rgba(255, 255, 255, 0.2) !important; // Fond plus clair au survol
+    color: #ffffff !important;
 
     &:before {
       content: '';
@@ -58,14 +65,19 @@
       top: 0;
       width: 4px;
       height: 100%;
-      background: $primary-color;
+      background: #ffffff !important; /* Barre d'accentuation blanche sur fond bleu */
     }
   }
 }
 
-.flex {
-  flex: 1 1 auto;
-  text-align: center;
+/* --- Suite de vos styles existants --- */
+.h-list-body .chat-messages .chat-menu-reply > div p,
+.pcoded-header.header-blue a.h-back-user-list {
+  color: $theme-font-color;
+}
+
+.header-chat .h-list-footer .input-group .form-control {
+  height: auto;
 }
 
 .fixed-button.active {
@@ -80,7 +92,6 @@
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.35);
   opacity: 0;
   z-index: 9;
-  -webkit-transition: all 0.5s ease;
   transition: all 0.5s ease;
 }
 
@@ -90,8 +101,7 @@
 
 #customerChart .apexcharts-tooltip {
   color: #000000;
-}
-
-#customerChart .apexcharts-tooltip .apexcharts-tooltip-series-group.active {
-  background: #ffffff !important;
+  .apexcharts-tooltip-series-group.active {
+    background: #ffffff !important;
+  }
 }

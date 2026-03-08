@@ -84,47 +84,77 @@
 
         <div class="p-4 scrollable-form">
           <div class="section-title text-primary">Informations de base</div>
-          
+
           <div class="form-floating mb-3">
             <input type="text" class="form-control" [(ngModel)]="newUser().userName" placeholder="User" [disabled]="isEditMode()">
             <label>Nom d'utilisateur</label>
           </div>
-          
+
           <div class="form-floating mb-3">
-            <input type="email" class="form-control" [(ngModel)]="newUser().email" placeholder="Email">
+            <input type="email"
+                  class="form-control"
+                  [(ngModel)]="newUser().email"
+                  #emailField="ngModel"
+                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                  placeholder="Email"
+                  [class.is-invalid]="emailField.invalid && emailField.touched">
             <label>Email Professionnel</label>
+            @if (emailField.invalid && emailField.touched) {
+              <div class="invalid-feedback animate-fade-in">
+                Veuillez saisir une adresse e-mail valide.
+              </div>
+            }
           </div>
 
           <div class="row g-2 mb-4">
             <div class="col-6">
               <div class="form-floating">
-                <input type="text" class="form-control" [(ngModel)]="newUser().firstName" placeholder="Prénom">
+                <input type="text"
+                       class="form-control"
+                       [(ngModel)]="newUser().firstName"
+                       #fNameField="ngModel"
+                       placeholder="Prénom"
+                       [class.is-invalid]="newUser().firstName && !isNameValid(newUser().firstName)">
                 <label>Prénom</label>
+                @if (newUser().firstName && !isNameValid(newUser().firstName)) {
+                  <div class="text-danger small mt-1 animate-fade-in">
+                    Lettres uniquement.
+                  </div>
+                }
               </div>
             </div>
             <div class="col-6">
               <div class="form-floating">
-                <input type="text" class="form-control" [(ngModel)]="newUser().lastName" placeholder="Nom">
+                <input type="text"
+                       class="form-control"
+                       [(ngModel)]="newUser().lastName"
+                       #lNameField="ngModel"
+                       placeholder="Nom"
+                       [class.is-invalid]="newUser().lastName && !isNameValid(newUser().lastName)">
                 <label>Nom</label>
+                @if (newUser().lastName && !isNameValid(newUser().lastName)) {
+                  <div class="text-danger small mt-1 animate-fade-in">
+                    Lettres uniquement.
+                  </div>
+                }
               </div>
             </div>
           </div>
 
           <div class="section-title text-primary">Localisation & Statut</div>
-          
+
           <div class="form-group mb-3">
-  <label class="small fw-bold text-muted mb-1">Site d'affectation</label>
-  <select class="form-select form-select-lg" 
-          [(ngModel)]="newUser().siteName" 
-          name="siteName"> <option value="">Sélectionnez un site</option>
-    @for (site of sites(); track site.siteName) {
-      <option [value]="site.siteName">{{ site.siteName }}</option>
-    }
-  </select>
-</div> 
+            <label class="small fw-bold text-muted mb-1">Site d'affectation</label>
+            <select class="form-select form-select-lg" [(ngModel)]="newUser().siteName" name="siteName">
+              <option value="">Sélectionnez un site</option>
+              @for (site of sites(); track site.siteName) {
+                <option [value]="site.siteName">{{ site.siteName }}</option>
+              }
+            </select>
+          </div>
 
           <div class="form-check form-switch mb-4">
-            <input class="form-check-input" type="checkbox" id="userStatus" 
+            <input class="form-check-input" type="checkbox" id="userStatus"
                    [checked]="newUser().isActive === 1"
                    (change)="newUser().isActive = ($any($event.target).checked ? 1 : 0)">
             <label class="form-check-label fw-bold ms-2" for="userStatus" style="cursor: pointer;">
@@ -153,7 +183,7 @@
 
           <button type="button" class="btn btn-success w-100 py-3 fw-bold shadow-sm"
                   (click)="saveUser()"
-                  [disabled]="!newUser().userName || !newUser().roleName || isLoading()">
+                  [disabled]="!newUser().userName || !newUser().roleName || !isEmailValid(newUser().email) || !isNameValid(newUser().firstName) || !isNameValid(newUser().lastName) || isLoading()">
             @if (isLoading()) {
               <span class="spinner-border spinner-border-sm me-2"></span> Traitement...
             } @else {
