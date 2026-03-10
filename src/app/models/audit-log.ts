@@ -26,6 +26,7 @@ export interface AuditLog {
 export type EventType =
   | 'LOGIN' | 'LOGOUT' | 'LOGIN_FAILED'
   | 'CREATE' | 'UPDATE' | 'DELETE' | 'READ'
+  | 'CREATE_FAILED'
   | 'ERROR' | 'EXPORT' | 'IMPORT';
 
 export type Severity = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';

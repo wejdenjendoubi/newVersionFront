@@ -42,6 +42,12 @@ export class AdminService {
     );
   }
 
+  forceDeleteUser(id: number): Observable<void> {
+    return this.http.delete<ApiResponse<void>>(`${this.adminUsersUrl}/${id}/force`).pipe(
+      map(res => res.data)
+    );
+  }
+
   getRoles(): Observable<Role[]> {
     return this.http.get<ApiResponse<Role[]>>(this.adminRolesUrl).pipe(
       map(res => res.data)

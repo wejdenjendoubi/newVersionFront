@@ -40,6 +40,7 @@ export class AuditListComponent implements OnInit {
 
   eventTypes: EventType[] = [
     'LOGIN', 'LOGOUT', 'LOGIN_FAILED',
+    'CREATE_FAILED', 
     'CREATE', 'UPDATE', 'DELETE', 'ERROR', 'EXPORT', 'IMPORT'
   ];
 
@@ -124,6 +125,7 @@ export class AuditListComponent implements OnInit {
       CREATE:       'event-create',
       UPDATE:       'event-update',
       DELETE:       'event-delete',
+      CREATE_FAILED:  'event-failed',
       ERROR:        'event-error',
       EXPORT:       'event-export',
       IMPORT:       'event-import'
@@ -139,6 +141,7 @@ export class AuditListComponent implements OnInit {
       CREATE:       '➕',
       UPDATE:       '✏️',
       DELETE:       '🗑️',
+      CREATE_FAILED:  '⚠️',
       ERROR:        '❌',
       EXPORT:       '📤',
       IMPORT:       '📥'

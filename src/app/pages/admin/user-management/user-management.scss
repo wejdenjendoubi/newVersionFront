@@ -151,3 +151,52 @@
   color: #ff5370; background: rgba(255, 83, 112, 0.1); border: none;
   &:hover { background: #ff5370; color: white; }
 }
+// ── Delete modal ─────────────────────────────────────────────
+.delete-modal-content {
+  background: #fff;
+  border-radius: 16px;
+  width: 480px;
+  max-width: 95vw;
+  animation: slideUp 0.25s ease;
+}
+
+.delete-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  .option-icon {
+    font-size: 1.5rem;
+    color: #adb5bd;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  &.selected {
+    border-color: #f0a500;
+    background: #fffbf0;
+    .option-icon { color: #f0a500; }
+  }
+
+  &.option-danger.selected {
+    border-color: #dc3545;
+    background: #fff5f5;
+    .option-icon { color: #dc3545; }
+  }
+
+  &:hover:not(.selected) {
+    border-color: #ced4da;
+    background: #f8f9fa;
+  }
+}
