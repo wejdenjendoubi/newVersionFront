@@ -17,7 +17,7 @@ export interface AuditLog {
   newValue: string;
   statusCode: number;
   errorMessage: string;
-  stackTrace: string;      // ✅ AJOUTÉ — manquait dans l'interface
+  stackTrace: string;      
   durationMs: number;
   sessionId: string;
   createdAt: string;

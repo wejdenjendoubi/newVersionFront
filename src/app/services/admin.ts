@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AdminService {
   private http = inject(HttpClient);
+
   private apiUrl = `http://localhost:8080/api`;
 
   // Chemins d'accès sécurisés correspondant au SecurityConfig

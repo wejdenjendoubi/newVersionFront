@@ -129,6 +129,7 @@ export class AuditListComponent implements OnInit {
       ERROR:        'event-error',
       EXPORT:       'event-export',
       IMPORT:       'event-import'
+      
     };
     return map[eventType] ?? '';
   }
@@ -145,6 +146,7 @@ export class AuditListComponent implements OnInit {
       ERROR:        '❌',
       EXPORT:       '📤',
       IMPORT:       '📥'
+      
     };
     return map[eventType] ?? '📋';
   }
