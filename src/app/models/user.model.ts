@@ -28,7 +28,7 @@ export interface MenuItemDTO {
   label: string;
   icon: string;
   link: string;
-  parentId?: number;
+  parentId?: number | null;
   isTitle?: number;
   isLayout?: number;
   createdAt?: string;

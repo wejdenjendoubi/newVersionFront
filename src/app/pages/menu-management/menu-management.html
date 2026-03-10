@@ -15,7 +15,8 @@
               <th>Label</th>
               <th>Icône</th>
               <th>Lien</th>
-              <th>Parent ID</th>
+              <th>Type</th>
+              <th>Parent</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -23,9 +24,24 @@
             @for (item of menus(); track item.menuItemId) {
               <tr>
                 <td><strong>{{ item.label }}</strong></td>
-                <td><i [class]="item.icon"></i></td>
+                <td><i [class]="item.icon"></i> <small class="text-muted ms-1">{{ item.icon }}</small></td>
                 <td><code>{{ item.link }}</code></td>
-                <td><span class="badge bg-light text-dark">{{ item.parentId || 'Aucun' }}</span></td>
+                <td>
+                  @if (item.parentId) {
+                    <span class="badge bg-info text-white">Sous-menu</span>
+                  } @else {
+                    <span class="badge bg-primary">Menu principal</span>
+                  }
+                </td>
+                <td>
+                  @if (item.parentId) {
+                    <span class="badge bg-light text-dark">
+                      {{ getParentLabel(item.parentId) }}
+                    </span>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
                 <td>
                   <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(item)">
                     <i class="feather icon-edit"></i>
@@ -53,33 +69,76 @@
           <button type="button" class="btn-close btn-close-white" (click)="displayModal = false"></button>
         </div>
         <div class="modal-body">
+
+          <!-- Type : Menu principal ou Sous-menu -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Type d'élément</label>
+            <div class="d-flex gap-4">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="menuType" id="typeMenu"
+                       [value]="false" [(ngModel)]="isSubMenu" (ngModelChange)="onSubMenuToggle()">
+                <label class="form-check-label" for="typeMenu">
+                  <i class="feather icon-menu me-1"></i> Menu principal
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="menuType" id="typeSubMenu"
+                       [value]="true" [(ngModel)]="isSubMenu" (ngModelChange)="onSubMenuToggle()">
+                <label class="form-check-label" for="typeSubMenu">
+                  <i class="feather icon-corner-down-right me-1"></i> Sous-menu
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dropdown Parent (visible seulement si sous-menu) -->
+          @if (isSubMenu) {
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Menu parent <span class="text-danger">*</span></label>
+              <select class="form-select" [(ngModel)]="newMenu.parentId" name="parentId">
+                <option [ngValue]="null" disabled>-- Choisir un parent --</option>
+                @for (m of parentMenuOptions; track m.menuItemId) {
+                  <option [ngValue]="m.menuItemId">{{ m.label }}</option>
+                }
+              </select>
+            </div>
+          }
+
           <div class="mb-3">
             <label class="form-label">Label</label>
-            <input type="text" [(ngModel)]="newMenu.label" class="form-control">
+            <input type="text" [(ngModel)]="newMenu.label" class="form-control" placeholder="ex: Tableau de bord">
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Icône (ex: feather icon-home)</label>
-            <input type="text" [(ngModel)]="newMenu.icon" class="form-control">
+            <label class="form-label">Icône</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i [class]="newMenu.icon || 'feather icon-help-circle'"></i>
+              </span>
+              <input type="text" [(ngModel)]="newMenu.icon" class="form-control" placeholder="ex: feather icon-home">
+            </div>
+            <small class="text-muted">Aperçu de l'icône en temps réel</small>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Lien (Route)</label>
-            <input type="text" [(ngModel)]="newMenu.link" class="form-control">
+            <input type="text" [(ngModel)]="newMenu.link" class="form-control" placeholder="ex: /dashboard">
           </div>
-          <div class="mb-3">
-            <label class="form-label">ID du Parent (laisser vide si aucun)</label>
-            <input type="number" [(ngModel)]="newMenu.parentId" class="form-control">
-          </div>
-          <div class="form-check">
+
+          <div class="form-check mt-2">
             <input type="checkbox"
                    [checked]="newMenu.isTitle === 1"
                    (change)="newMenu.isTitle = $any($event.target).checked ? 1 : 0"
                    class="form-check-input" id="checkTitle">
-            <label class="form-check-label" for="checkTitle">Est-ce un titre ?</label>
+            <label class="form-check-label" for="checkTitle">Est un titre de section</label>
           </div>
+
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="displayModal = false">Fermer</button>
-          <button class="btn btn-primary" (click)="submitMenu()">Enregistrer</button>
+          <button class="btn btn-primary" (click)="submitMenu()">
+            <i class="feather icon-save me-1"></i> Enregistrer
+          </button>
         </div>
       </div>
     </div>

@@ -53,31 +53,60 @@ export class NavContentComponent implements OnInit {
   }
 
   loadDynamicNavigation(): void {
-    this.adminService.getAuthorizedMenus().subscribe({
-      next: (menuDTOs: MenuItemDTO[]) => {
-        if (!menuDTOs || menuDTOs.length === 0) return;
+  this.adminService.getAuthorizedMenus().subscribe({
+    next: (menuDTOs: MenuItemDTO[]) => {
+      if (!menuDTOs || menuDTOs.length === 0) return;
 
-        const dynamicGroup: NavigationItem = {
-          id: 'dynamic-group',
-          title: '',
-          type: 'group',
-          icon: 'icon-navigation',
-          // Correction de l'erreur "children" : on force le mapping vers NavigationItem
-          children: menuDTOs.map((m): NavigationItem => ({
+      // 1. Séparer menus principaux et sous-menus
+      const parentMenus = menuDTOs.filter(m => !m.parentId);
+      const subMenus = menuDTOs.filter(m => m.parentId);
+
+      // 2. Construire les NavigationItems avec leurs enfants
+      const children: NavigationItem[] = parentMenus.map((m): NavigationItem => {
+        const children = subMenus.filter(sub => sub.parentId === m.menuItemId);
+
+        if (children.length > 0) {
+          // Menu avec sous-menus → type 'collapse'
+          return {
             id: `menu-${m.menuItemId}`,
             title: m.label,
-            type: 'item',
-            url: m.link,
+            type: 'collapse',
             icon: m.icon || 'feather icon-circle',
-            classes: 'nav-item'
-          }))
-        };
+            children: children.map((sub): NavigationItem => ({
+              id: `menu-${sub.menuItemId}`,
+              title: sub.label,
+              type: 'item',
+              url: sub.link,
+              icon: sub.icon || 'feather icon-circle',
+              classes: 'nav-item'
+            }))
+          };
+        }
 
-        this.navigation.set([dynamicGroup]);
-      },
-      error: (err) => console.error('Erreur API Sidebar:', err)
-    });
-  }
+        // Menu simple → type 'item'
+        return {
+          id: `menu-${m.menuItemId}`,
+          title: m.label,
+          type: 'item',
+          url: m.link,
+          icon: m.icon || 'feather icon-circle',
+          classes: 'nav-item'
+        };
+      });
+
+      const dynamicGroup: NavigationItem = {
+        id: 'dynamic-group',
+        title: '',
+        type: 'group',
+        icon: 'icon-navigation',
+        children: children
+      };
+
+      this.navigation.set([dynamicGroup]);
+    },
+    error: (err) => console.error('Erreur API Sidebar:', err)
+  });
+}
 
   // Correction de l'erreur navMob dans le HTML
   navMob(): void {

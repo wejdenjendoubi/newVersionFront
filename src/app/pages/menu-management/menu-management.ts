@@ -17,6 +17,7 @@ export class MenuManagement implements OnInit {
   menus = signal<MenuItemDTO[]>([]);
   displayModal = false;
   isEditMode = false;
+  isSubMenu = false; // ← nouveau
 
   newMenu: MenuItemDTO = {
     menuItemId: 0,
@@ -25,50 +26,54 @@ export class MenuManagement implements OnInit {
     link: '',
     isTitle: 0,
     isLayout: 0,
-    parentId: undefined
+    parentId: null
   };
 
-  ngOnInit() {
-    this.loadMenus();
-  }
+  ngOnInit() { this.loadMenus(); }
 
   loadMenus() {
     this.adminService.getAllMenuItems().subscribe({
-      next: (res: ApiResponse<MenuItemDTO[]>) => {
-        this.menus.set(res.data || []);
-      },
+      next: (res: ApiResponse<MenuItemDTO[]>) => this.menus.set(res.data || []),
       error: (err) => console.error("Erreur de chargement", err)
     });
   }
 
   openAddModal() {
     this.isEditMode = false;
+    this.isSubMenu = false;
     this.resetForm();
     this.displayModal = true;
   }
 
   openEditModal(item: MenuItemDTO) {
     this.isEditMode = true;
-    this.newMenu = { ...item }; // Copie l'objet pour ne pas modifier la liste en direct
+    this.isSubMenu = item.parentId != null;
+    this.newMenu = { ...item };
     this.displayModal = true;
+  }
+
+  onSubMenuToggle() {
+    if (!this.isSubMenu) {
+      this.newMenu.parentId = null; // reset si on déselectionne sous-menu
+    }
   }
 
   deleteMenu(id: number) {
     if (confirm('Supprimer cet élément ?')) {
       this.adminService.deleteMenuItem(id).subscribe({
-        next: () => {
-          this.loadMenus();
-          alert("Menu supprimé !");
-        },
+        next: () => { this.loadMenus(); alert("Menu supprimé !"); },
         error: (err) => console.error("Erreur suppression", err)
       });
     }
   }
 
   submitMenu() {
+    const payload = { ...this.newMenu };
+    if (!this.isSubMenu) payload.parentId = null;
+
     const request = this.isEditMode
-      ? this.adminService.updateMenuItem(this.newMenu.menuItemId, this.newMenu)
-      : this.adminService.createMenuItem(this.newMenu);
+      ? this.adminService.updateMenuItem(payload.menuItemId, payload)
+      : this.adminService.createMenuItem(payload);
 
     request.subscribe({
       next: () => {
@@ -82,14 +87,17 @@ export class MenuManagement implements OnInit {
   }
 
   resetForm() {
-    this.newMenu = {
-      menuItemId: 0,
-      label: '',
-      icon: '',
-      link: '',
-      isTitle: 0,
-      isLayout: 0,
-      parentId: undefined
-    };
+    this.newMenu = { menuItemId: 0, label: '', icon: '', link: '', isTitle: 0, isLayout: 0, parentId: null };
+    this.isSubMenu = false;
   }
+
+  // Menus disponibles comme parents (exclure le menu en cours d'édition)
+  get parentMenuOptions(): MenuItemDTO[] {
+    return this.menus().filter(m => m.menuItemId !== this.newMenu.menuItemId && !m.parentId);
+  }
+
+  getParentLabel(parentId: number): string {
+  const parent = this.menus().find(m => m.menuItemId === parentId);
+  return parent ? parent.label : `#${parentId}`;
+}
 }
