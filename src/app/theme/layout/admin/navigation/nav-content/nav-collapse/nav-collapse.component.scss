@@ -1,0 +1,23 @@
+.pcoded-submenu {
+  li {
+    a {
+      color: #a9b7d0 !important;
+
+      &:hover {
+        color: #fff !important;
+      }
+
+      .pcoded-mtext {
+        color: #a9b7d0 !important;
+      }
+
+      .pcoded-micon i {
+        color: #a9b7d0 !important;
+      }
+    }
+
+    &.active > a {
+      color: #fff !important;
+    }
+  }
+}

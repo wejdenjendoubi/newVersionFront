@@ -1,0 +1,24 @@
+:host {
+  .pcoded-submenu {
+    li a {
+      color: #a9b7d0 !important;
+
+      .pcoded-mtext,
+      .pcoded-micon i {
+        color: #a9b7d0 !important;
+      }
+
+      &:hover {
+        color: #fff !important;
+        .pcoded-mtext,
+        .pcoded-micon i {
+          color: #fff !important;
+        }
+      }
+    }
+
+    li.active > a {
+      color: #fff !important;
+    }
+  }
+}

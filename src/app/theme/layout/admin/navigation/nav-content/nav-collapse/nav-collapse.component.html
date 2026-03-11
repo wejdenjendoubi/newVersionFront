@@ -9,7 +9,7 @@
       {{ item().title }}
     </span>
   </a>
-  <ul class="pcoded-submenu" [routerLinkActive]="['active']" [ngClass]="item().classes!">
+  <ul class="pcoded-submenu">
     @for (items of item().children; track items) {
       @if (items.type === 'item') {
         <app-nav-item [item]="items" />

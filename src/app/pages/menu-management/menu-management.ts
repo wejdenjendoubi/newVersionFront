@@ -50,6 +50,11 @@ export class MenuManagement implements OnInit {
     this.isSubMenu = item.parentId != null;
     this.newMenu = { ...item };
     this.displayModal = true;
+
+
+  console.log('🔍 Edit item:', this.newMenu); // ← ajoutez ceci
+  console.log('🔍 menuItemId:', this.newMenu.menuItemId);
+  this.displayModal = true;
   }
 
   onSubMenuToggle() {
@@ -70,6 +75,9 @@ export class MenuManagement implements OnInit {
   submitMenu() {
     const payload = { ...this.newMenu };
     if (!this.isSubMenu) payload.parentId = null;
+
+    console.log('🔍 Payload envoyé:', payload); // ← et ceci
+  console.log('🔍 URL appelée:', `menu-items/${payload.menuItemId}`);
 
     const request = this.isEditMode
       ? this.adminService.updateMenuItem(payload.menuItemId, payload)

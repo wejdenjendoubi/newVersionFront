@@ -105,3 +105,40 @@
     background: #ffffff !important;
   }
 }
+/* --- FIX SOUS-MENUS (texte visible dans pcoded-submenu) --- */
+.pcoded-navbar {
+  .pcoded-inner-navbar {
+    li.pcoded-hasmenu {
+      .pcoded-submenu {
+        background: #003d80 !important; // légèrement plus sombre que #004a99
+
+        li > a {
+          color: rgba(255, 255, 255, 0.8) !important;
+
+          .pcoded-mtext {
+            color: rgba(255, 255, 255, 0.8) !important;
+          }
+
+          .pcoded-micon i {
+            color: rgba(255, 255, 255, 0.8) !important;
+          }
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+
+            .pcoded-mtext,
+            .pcoded-micon i {
+              color: #ffffff !important;
+            }
+          }
+        }
+
+        li.active > a {
+          color: #ffffff !important;
+          background: rgba(255, 255, 255, 0.2) !important;
+        }
+      }
+    }
+  }
+}
